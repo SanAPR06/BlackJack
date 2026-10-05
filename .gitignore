@@ -1,0 +1,9 @@
+# sistema y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+# pruebas locales
+_*.html
+node_modules/

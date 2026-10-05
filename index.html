@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#051b14">
+<meta name="description" content="Blackjack de 8 mazos con 4 mesas, premios exclusivos, estrategia básica y conteo de cartas.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Blackjack">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Blackjack 8 Mazos</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header>
+  <button class="btn alt" id="menuBtn" aria-label="Menú" aria-expanded="false">&#9776;</button>
+  <h1>BLACKJACK<small>8 MAZOS · PAGA 3:2</small></h1>
+  <div class="stats">
+    <div class="stat"><small>Saldo</small><b id="bal">$0</b></div>
+    <div class="stat"><small>Apuesta ronda</small><b id="tot">$0</b></div>
+    <div class="stat"><small>Cartas restantes</small><b id="shoe">416</b>
+      <div class="meter" title="La línea dorada marca el 25%: al llegar ahí se rebaraja"><i id="shoeFill"></i><u></u></div></div>
+    <div class="stat"><small>Ganancia sidebets/bonos</small><b id="sbp">$0</b></div>
+    <div class="stat"><small>Ganancia total</small><b id="gt">$0</b></div>
+    <div class="stat" title="Suma de las calificaciones (1-100) de cada ronda según la estrategia básica"><small>Score</small><b id="score">0</b></div>
+    <div class="stat potstat" title="Se lo lleva el MEGA JACKPOT (A♠ A♠ A♠ en el 21+3). Cada mesa tiene su bote: recibe el 3% de cada apuesta 21+3 y se conserva entre partidas."><small>Bote progresivo</small><b id="pot">$1,000</b></div>
+  </div>
+  <div class="hbtns">
+    <div class="audiowrap">
+      <button class="btn alt" id="audioBtn" title="Sonido y música" aria-label="Sonido y música"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg><span>Audio</span></button>
+      <div id="audioPanel" hidden>
+        <div class="arow"><label><input type="checkbox" id="musOn"> Música</label><select id="musStyle" aria-label="Estilo de música"></select><input type="range" id="musVol" min="0" max="1" step=".05"></div>
+        <div class="arow"><label><input type="checkbox" id="sfxOn"> Efectos</label><input type="range" id="sfxVol" min="0" max="1" step=".05"></div>
+      </div>
+    </div>
+    <button class="btn alt" id="stratBtn" title="Ver tabla de estrategia básica" aria-label="Estrategia básica"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12S5.5 4.5 12 4.5 22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></svg><span>Estrategia</span></button>
+    <button class="btn alt" id="countBtn" title="Contador de cartas Hi-Lo y mini guía" aria-label="Contador de cartas"><span class="pm">+/&minus;</span><span>Conteo</span></button>
+    <button class="btn alt" id="endBtn" title="Terminar el juego y ver el resumen" aria-label="Terminar juego">Terminar</button>
+    <button class="btn alt" id="homeBtn" title="Volver al inicio" aria-label="Inicio">&#8962; Inicio</button>
+  </div>
+</header>
+<main>
+  <div id="msg"></div>
+  <div id="top">
+  <div class="dealer">
+    <div class="shoe" id="shoeEl" title="Zapato de 8 mazos"></div>
+    <div class="cutcard" id="cutCard" hidden title="Carta de corte: esta es la última ronda antes de barajar"><b>CORTE</b></div>
+    <div class="label">Dealer · se planta en 17</div>
+    <div class="cards" id="dcards"></div>
+    <div class="total" id="dtotal"></div>
+  </div>
+  <div id="cut"></div>
+  <section id="felt" aria-label="Pagos impresos en la mesa">
+    <svg class="arc" viewBox="0 0 800 168" role="img" aria-label="El blackjack paga 3 a 2. El dealer se planta en todos los 17. Límites de la mesa.">
+      <defs><path id="arc1" d="M30,112 Q400,-18 770,112"/><path id="arc2" d="M120,124 Q400,38 680,124"/></defs>
+      <text class="a1"><textPath href="#arc1" startOffset="50%" text-anchor="middle">EL BLACKJACK PAGA 3 A 2</textPath></text>
+      <text class="a2"><textPath href="#arc2" startOffset="50%" text-anchor="middle">EL DEALER SE PLANTA EN TODOS LOS 17</textPath></text>
+      <text class="a3" id="arcLimits" x="400" y="156" text-anchor="middle"></text>
+    </svg>
+    <div id="limitsM"></div>
+    <button class="btn alt" id="payBtn" aria-expanded="false">Ver pagos y bote</button>
+    <div class="prints">
+      <div class="pp"><h4>Par Perfecto</h4>
+        <div><span>Par mixto</span><i></i><b>6 : 1</b></div>
+        <div><span>Mismo color</span><i></i><b>12 : 1</b></div>
+        <div><span>Par perfecto</span><i></i><b>25 : 1</b></div>
+        <div class="rule"><span id="surrRule">Rendición permitida</span></div></div>
+      <div class="pp"><h4>21 + 3</h4>
+        <div><span>Color</span><i></i><b>5 : 1</b></div>
+        <div><span>Escalera</span><i></i><b>10 : 1</b></div>
+        <div><span>Trío</span><i></i><b>30 : 1</b></div>
+        <div><span>Escalera de color</span><i></i><b>40 : 1</b></div>
+        <div><span>Trío mismo palo</span><i></i><b>100 : 1</b></div>
+        <div><span>Trío de ases</span><i></i><b>100 : 1</b></div>
+        <div><span>Esc. real de picas</span><i></i><b>250 : 1</b></div></div>
+      <div class="pp" id="prizePanel"></div>
+      <div class="pp hof"><h4>★ Mega Jackpot ★</h4>
+        <div class="mega"><span>A♠ A♠ A♠ en el 21+3 · paga el bote</span></div>
+        <div class="mega big"><b id="potFelt">$1,000</b></div>
+        <h5>Salón de la fama</h5><ol id="hof"></ol></div>
+    </div>
+    <p class="fine">Dividir hasta 4 manos · los ases se dividen una sola vez · bonos pagados sobre la apuesta de la mano · clic en un círculo suma la ficha elegida, clic derecho la quita</p>
+  </section>
+  </div>
+  <div class="spots" id="spots"></div>
+  <div class="row hc" id="setup"></div>
+  <div class="tray" id="tray"></div>
+  <div id="tip"></div>
+  <div class="row" id="actions"></div>
+  <div id="rating"></div>
+  <div class="grid">
+    <div class="box"><h3>Registro de sidebets y bonos</h3><div id="log"></div></div>
+  </div>
+</main>
+<aside id="strat" aria-label="Tabla de estrategia básica">
+  <div class="shead"><div class="tabs"><button class="tab on" data-tab="strat">Estrategia</button><button class="tab" data-tab="count">Conteo</button></div>
+    <button class="btn alt" id="stratX" aria-label="Cerrar panel">&times;</button></div>
+  <div id="stratBody"></div>
+</aside>
+<div id="vibe" aria-hidden="true"></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="nameModal" class="overlay" hidden><div class="mbox">
+  <h3>¡MEGA JACKPOT!</h3>
+  <p>Eres una leyenda. Escribe tu nombre y quedará grabado en la mesa para siempre.</p>
+  <input id="nameIn" maxlength="24" placeholder="Tu nombre" autocomplete="off">
+  <div class="row"><button class="btn" id="nameGo">Grabar en la mesa</button></div></div></div>
+<div id="celebrate" hidden><div id="confetti"></div><div class="cel"><small id="celKick"></small><h2 id="celTitle"></h2><b id="celAmt"></b></div></div>
+<div id="broke" class="overlay" hidden><div class="mbox"><p id="brokeTxt"></p>
+  <div class="row" id="brokeBtns"></div>
+  <div class="row"><button class="btn alt" id="brokeNo">No, terminar sesión</button></div></div></div>
+<div id="modal" hidden><div class="mbox"><p id="mtxt"></p>
+  <div class="row"><button class="btn" id="mYes">Salir al inicio</button><button class="btn alt" id="mNo">Cancelar</button></div></div></div>
+<script src="js/datos.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/musica.js"></script>
+<script src="js/persistencia.js"></script>
+<script src="js/premios.js"></script>
+<script src="js/interfaz.js"></script>
+<script src="js/estrategia.js"></script>
+<script src="js/pantallas.js"></script>
+<script src="js/ronda.js"></script>
+</body>
+</html>

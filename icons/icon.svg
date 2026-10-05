@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs><radialGradient id="g" cx="50%" cy="50%" r="75%"><stop offset="0" stop-color="#1c6044"/><stop offset="1" stop-color="#051b14"/></radialGradient></defs>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <circle cx="262" cy="268" r="190" fill="#000" opacity=".3"/>
+  <circle cx="256" cy="256" r="190" fill="#d9b45a" stroke="#8a6a22" stroke-width="6"/>
+  <circle cx="256" cy="256" r="171" fill="none" stroke="#f6f1e2" stroke-width="38" stroke-dasharray="65.6 68.7" transform="rotate(-11 256 256)"/>
+  <circle cx="256" cy="256" r="133" fill="#0d3f2c" stroke="#d9b45a" stroke-width="5"/>
+  <text x="256" y="322" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="138" fill="#ecd28f">21</text>
+  <text x="256" y="214" text-anchor="middle" font-family="'Segoe UI Symbol','Apple Symbols',sans-serif" font-size="62" fill="#ecd28f">&#9824;</text>
+</svg>
