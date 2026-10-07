@@ -5,9 +5,9 @@ const chipLabel=n=>n>=1000?n/1000+'K':n, SHOE_SIZE=416, CUT=SHOE_SIZE*0.25;
 /* ---- Mesas: cada una con sus límites, saldo de entrada, fichas, bote propio y una lista de música que sube de intensidad ---- */
 const TABLES={
   caracas:{id:'caracas',name:'Caracas',min:5,max:250,buyMin:100,buyMax:5000,presets:[100,500,1000,2500,5000],chips:[5,10,25,50,100],seed:1000,jokers:2,cutCard:'yellow',prizes:['b678'],cnt:{},energy:1,tag:'Caribe y bossa · relajado',playlist:[['piano','lofi'],['lofi','bossa'],['bossa','salsa'],['salsa','bossa']]},
-  madrid:{id:'madrid',name:'Madrid',min:20,max:1000,buyMin:500,buyMax:20000,presets:[500,2000,5000,10000,20000],chips:[5,25,100,500,1000],seed:5000,cutCard:'purple',prizes:['reyreina','lluvia','b777'],cnt:{},energy:2,tag:'Guitarra y flamenco',playlist:[['guitarra','lofi'],['guitarra','jazz'],['flamenco','jazz'],['flamenco','guitarra']]},
-  monaco:{id:'monaco',name:'Monaco',min:100,max:5000,buyMin:2500,buyMax:100000,presets:[2500,10000,25000,50000,100000],chips:[25,100,500,1000,5000],seed:25000,cutCard:'red',prizes:['palo21','bKA'],cnt:{6:12},energy:3,tag:'Elegancia y suspenso',playlist:[['piano','noir'],['noir','cinematic'],['cinematic','jazz'],['cinematic','synth']]},
-  vegas:{id:'vegas',name:'Las Vegas',min:500,max:25000,buyMin:10000,buyMax:1000000,presets:[10000,50000,100000,250000,1000000],chips:[100,500,1000,5000,25000],seed:100000,cutCard:'yellow',prizes:['picas21'],cnt:{5:3,7:25,8:100},energy:4,tag:'Swing, funk y house · a todo volumen',playlist:[['swing','jazz'],['swing','funk'],['funk','synth'],['house','funk','synth']]}
+  madrid:{id:'madrid',name:'Madrid',min:20,max:1000,buyMin:500,buyMax:20000,presets:[500,2000,5000,10000,20000],chips:[5,25,100,500,1000],seed:5000,cutCard:'purple',prizes:['reyreina','lluvia','b777','siesta'],cnt:{},energy:2,tag:'Guitarra y flamenco',playlist:[['guitarra','lofi'],['guitarra','jazz'],['flamenco','jazz'],['flamenco','guitarra']]},
+  monaco:{id:'monaco',name:'Monaco',min:100,max:5000,buyMin:2500,buyMax:100000,presets:[2500,10000,25000,50000,100000],chips:[25,100,500,1000,5000],seed:25000,cutCard:'red',prizes:['palo21','bKA','doble007'],cnt:{6:12},energy:3,tag:'Elegancia y suspenso',playlist:[['piano','noir'],['noir','cinematic'],['cinematic','jazz'],['cinematic','synth']]},
+  vegas:{id:'vegas',name:'Las Vegas',min:500,max:25000,buyMin:10000,buyMax:1000000,presets:[10000,50000,100000,250000,1000000],chips:[100,500,1000,5000,25000],seed:100000,cutCard:'yellow',prizes:['picas21','doble'],cnt:{5:3,7:25,8:100},energy:4,tag:'Swing, funk y house · a todo volumen',playlist:[['swing','jazz'],['swing','funk'],['funk','synth'],['house','funk','synth']]}
 };
 const TABLE_ORDER=['caracas','madrid','monaco','vegas'];
 const T=()=>TABLES[S.table]||TABLES.caracas;
@@ -15,7 +15,7 @@ const sideMax=()=>T().max/10,sideMin=()=>T().chips[0]; // sidebets: de la ficha 
 // bonos de la mano (multiplicador N:1). Más raros = pagan más. Probabilidades por mano (estrategia básica, 8 mazos):
 // 6-7-8 ≈ 1 en 600 (suited ≈ 1 en 9,600) · 7-7-7 ≈ 1 en 4,300 (suited ≈ 1 en 95,000) · K-A de picas ≈ 1 en 1,350
 // 21 con 7+ cartas ≈ 1 en 38,000 · 21 con 8+ cartas ≈ 1 en 242,000
-const BONUS_KA=7,B678=[3,20],B777=[6,30]; // [normal, mismo palo]
+const BONUS_KA=7,B678=[3,20],B777=[6,30],SIESTA=1,DOBLE007=50; // [normal, mismo palo]
 const BIG_PRIZE=12; // los premios de mano que pagan 12:1 o más son "premios gordos" (fanfarria, luces y celebración)
 const PICAS21=12,LLUVIA=20,REYREINA=2,PALO21=2; // premios exclusivos: 21 de picas, 5 cartas rojas, Rey y Reina (extra), blackjack de palo
 const POT_RATE=.03; // bote progresivo de cada mesa: arranca en su base y recibe el 3% de cada apuesta 21+3

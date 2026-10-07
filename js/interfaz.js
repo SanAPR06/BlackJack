@@ -98,14 +98,15 @@ function render(){
       <button class="btn act" data-a="split" ${canSplit(s,h)?'':'disabled'}><i>&lt;&gt;</i>Dividir</button>
       <button class="btn act" data-a="surrender" ${canSurrender(s,h)?'':'disabled'} title="Devuelve la mitad de la apuesta. Solo como primera jugada${T().min<SURR_MIN?' y con apuesta de '+fmt(SURR_MIN)+' o más':''}"><i>&frac12;</i>Rendirse</button>`;
   }else if(S.phase==='done'){
-    A.innerHTML=`<button class="btn" id="next">Nueva ronda</button>`;
+    const g=S.gamble;
+    A.innerHTML=(g?`<div class="gamble"><b>Doble o nada</b> · arriesgas ${fmt(g.amt)}${g.card?'<span class="gcard">'+cardHTML(g.card)+'</span>':''}<button class="btn act" data-g="red">♥ Rojo</button><button class="btn act" data-g="black">♠ Negro</button><button class="btn alt" data-g="cash">Cobrar</button></div>`:'')+`<button class="btn" id="next">Nueva ronda</button>`;
   }else A.innerHTML='';
   $('log').innerHTML=S.log.slice(0,40).map(l=>`<div><span>${l.text}</span><b class="${l.amt>0?'pos':l.amt<0?'neg':''}">${l.amt>0?'+':''}${l.amt?fmt(l.amt):''}</b></div>`).join('')||'<div style="opacity:.5">Sin movimientos aún.</div>';
 }
 
 /* ---------- events ---------- */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-n],[data-c],[data-k],[data-a],#deal,#rep,#clr,#next');if(!t||S.busy&&!t.dataset.k)return;
+  const t=e.target.closest('[data-n],[data-c],[data-k],[data-a],[data-g],#deal,#rep,#clr,#next');if(!t||S.busy&&!t.dataset.k)return;
   if(lpFired&&t.dataset.k){lpFired=false;return} // el toque largo ya vació la apuesta: no sumar otra ficha
   if(S.phase==='bet'){
     if(t.dataset.n){setHands(+t.dataset.n)}
@@ -120,6 +121,7 @@ document.addEventListener('click',e=>{
     else if(t.id==='rep')repeat();
     else if(t.id==='deal')deal();
   }else if(t.dataset.a)act(t.dataset.a);
+  else if(t.dataset.g)gamble(t.dataset.g);
   else if(t.id==='next')nextRound();
 });
 function clearBetSpot(t){

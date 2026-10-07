@@ -51,6 +51,9 @@ function prizeRows(t){
   if(t.jokers)rows.push(row(`Joker comodín (${t.jokers} en el zapato)`,'= Blackjack'));
   if(has('b678'))rows.push(row('6-7-8 · mismo palo',`${B678[0]} : 1 · ${B678[1]} : 1`));
   if(has('b777'))rows.push(row('7-7-7 · mismo palo',`${B777[0]} : 1 · ${B777[1]} : 1`));
+  if(has('siesta'))rows.push(row('Siesta · 21 y dealer 22',`+${SIESTA} : 1`));
+  if(has('doble007'))rows.push(row('Doble 007 · dos manos 7-7',`${DOBLE007} : 1`));
+  if(has('doble'))rows.push(row('Doble o nada tras ganar','rojo / negro'));
   if(has('reyreina'))rows.push(row('Rey y Reina del mismo palo',`${REYREINA} : 1`));
   if(has('lluvia'))rows.push(row('Lluvia de Oros · 5 rojas',`${LLUVIA} : 1`));
   if(has('palo21'))rows.push(row('Blackjack de palo',`${PALO21} : 1`));

@@ -587,3 +587,9 @@ html{overscroll-behavior-y:none}
   #actions{padding:4px 6px}
   body button.btn.act{min-height:38px;padding:6px 4px}
 }
+
+/* Doble o nada (Las Vegas) */
+.gamble{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px;width:100%;margin-bottom:8px;padding:8px 12px;border:1px solid var(--gold,#d4af37);border-radius:12px;background:rgba(0,0,0,.35)}
+.gamble b{color:var(--gold,#d4af37);letter-spacing:.08em;text-transform:uppercase}
+.gamble .gcard{display:inline-block;position:relative;width:46px;height:64px}
+.gamble .gcard .card{position:absolute;left:0;top:0;transform:scale(.8);transform-origin:top left}

@@ -2,7 +2,7 @@
    (Script clásico: comparte las variables globales con los demás archivos de js/; el orden de carga está en index.html.) */
 async function deal(){
   S.busy=true;
-  S.roundBase=S.balance+tableBet();S.bigPrize=false; // dinero antes de apostar: sirve para saber si la ronda, en total, ganó o perdió
+  S.roundBase=S.balance+tableBet();S.bigPrize=false;S.gamble=null; // dinero antes de apostar: sirve para saber si la ronda, en total, ganó o perdió
   S.last=S.spots.map(s=>({main:s.main,pp:s.pp,p3:s.p3}));
   S.log=[];
   chipSeen.clear();S.dec=[];S.rate=null;
@@ -35,6 +35,10 @@ async function deal(){
     s.hands[0].bj=isBJ(c);
     if(s.hands[0].bj){s.hands[0].done=true;S.stats.bjs=(S.stats.bjs||0)+1} // blackjacks naturales del jugador (cuentan aunque el dealer también lo tenga)
   });
+  if(hasPrize('doble007'))for(let i=0;i<S.spots.length-1;i++){ // Monaco: dos manos contiguas con 7-7 cada una
+    const a=S.spots[i].hands[0],b=S.spots[i+1].hands[0],is77=h=>h.cards.length===2&&h.cards.every(x=>x.r==='7');
+    if(is77(a)&&is77(b)){const w=(a.bet+b.bet)*DOBLE007;S.balance+=w;addLog(`Manos ${i+1} y ${i+2} · ¡DOBLE 007! (${DOBLE007}:1 en cada mano)`,w,'jackpot');celebrate('big','DOBLE 007',w)}
+  }
   // dealer peek
   const dBJ=isBJ(S.dealer);
   if((cv(up)>=10)&&dBJ){S.hole=false;S.msg='El dealer tiene Blackjack.';render();await sleep(600);finish();return}
@@ -109,7 +113,8 @@ function finish(){
       addLog(`${tag} · Premio ${bon.n} (${bon.m}:1)`,base*bon.m,bon.m>=BIG_PRIZE?'jackpot':'sidewin');
       if(bon.m>=BIG_PRIZE)celebrate('big',bon.n,base*bon.m)}
     else if(dBJ){res='Pierde'}
-    else if(dt>21||t>dt){pay=h.bet*2;res='Gana'}
+    else if(dt>21||t>dt){pay=h.bet*2;res='Gana';
+      if(hasPrize('siesta')&&t===21&&dt===22){pay+=h.bet*SIESTA;res=`Siesta ${SIESTA+1}:1`;addLog(`${tag} · Siesta: 21 y el dealer se pasa con 22 (+${SIESTA}:1)`,h.bet*SIESTA,'sidewin')}}
     else if(t===dt){pay=h.bet;res='Empate'}
     else res='Pierde';
     h.net=pay-h.bet;h.res=res;S.balance+=pay;net+=h.net;
@@ -123,10 +128,22 @@ function finish(){
   S.rate=roundRating();if(S.rate)S.ratings.push(S.rate.score);
   S.stats.rounds++;S.stats.peak=Math.max(S.stats.peak,S.balance);updateMusic();
   S.phase='done';S.busy=false;
+  S.gamble=hasPrize('doble')&&roundNet>0.001?{amt:roundNet,n:0,card:null}:null; // Las Vegas: ofrecer doble o nada con la ganancia de la ronda
   S.msg=(dBJ?'Dealer Blackjack. ':dt>21?'Dealer se pasa ('+dt+'). ':'Dealer: '+dt+'. ')+'Resultado de la ronda: '+(roundNet>0.001?'+':roundNet<-0.001?'-':'')+fmt(Math.abs(roundNet));
   render();
 }
+const GAMBLE_MAX=3;
+async function gamble(ch){ // doble o nada: color de la siguiente carta del zapato (50/50, sin ventaja para la casa)
+  const g=S.gamble;if(!g||S.busy)return;
+  if(ch==='cash'){S.gamble=null;S.msg='Cobraste tu ganancia.';render();return}
+  S.busy=true;g.card=draw();S.msg='Doble o nada: se destapa la carta…';render();await sleep(900);
+  const win=(ch==='red')===isRed(g.card.s);
+  if(win){S.balance+=g.amt;S.log.unshift({text:'Doble o nada · ganaste',amt:g.amt});g.amt*=2;g.n++;sfx('win');S.msg='¡Doble o nada ganado! Ahora arriesgas '+fmt(g.amt)+'.';if(g.n>=GAMBLE_MAX){S.msg='¡Ganaste '+GAMBLE_MAX+' veces seguidas! Cobras '+fmt(g.amt)+'.';S.gamble=null}}
+  else{S.balance-=g.amt;S.log.unshift({text:'Doble o nada · perdiste',amt:-g.amt});sfx('lose');S.msg='Doble o nada perdido ('+g.card.r+g.card.s+'). Pierdes '+fmt(g.amt)+'.';S.gamble=null}
+  S.busy=false;render();
+}
 function nextRound(){
+  S.gamble=null;
   S.phase='bet';S.dealer=[];S.hole=true;S.cur=null;mkSpots();
   S.msg='Elige el número de manos y coloca tus apuestas.';
   if(S.shoe.length<=CUT){newShoe();S.phase='cut';S.msg='Zapato barajado (8 mazos). Pica el mazo para continuar.'}
