@@ -1,7 +1,7 @@
 /* Service worker: permite instalar el juego como app y abrirlo sin conexión.
    Estrategia: primero la red (así siempre llega la versión más reciente) y, si no hay conexión, la copia guardada.
    Cambia VERSION cuando agregues o quites archivos de la lista SHELL, para que los dispositivos renueven su copia. */
-const VERSION='v4';
+const VERSION='v5';
 const CACHE = 'blackjack-' + VERSION;
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/style.css',

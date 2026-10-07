@@ -138,3 +138,21 @@ function repeat(){
 }
 
 /* ---------- round flow ---------- */
+
+/* tabla de pagos de una mesa, consultable desde la pantalla de inicio sin sentarse */
+function showPays(){
+  const t=TABLES[S.pick]||TABLES.caracas,pps=document.querySelectorAll('#felt .prints .pp');
+  $('payTitle').textContent='Pagos · Mesa '+t.name;
+  $('payBody').innerHTML=
+    `<div class="pp"><h4>Reglas de ${t.name}</h4><div><span>Apuesta por mano</span><i></i><b>${fmt(t.min)} – ${fmt(t.max)}</b></div>
+      <div><span>Sidebets</span><i></i><b>${fmt(sideMin())} – ${fmt(t.max/10)}</b></div>
+      <div><span>Rendición</span><i></i><b>${t.min<SURR_MIN?fmt(SURR_MIN)+' o más':'permitida'}</b></div></div>`+
+    (pps[0]?'<div class="pp">'+pps[0].innerHTML+'</div>':'')+(pps[1]?'<div class="pp">'+pps[1].innerHTML+'</div>':'')+
+    `<div class="pp"><h4>Premios de ${t.name}</h4>${prizeRows(t)}</div>
+     <div class="pp"><h4>Mega Jackpot</h4><div class="mega"><span>A♠ A♠ A♠ en el 21+3 · paga el bote de la mesa</span></div><div class="mega big"><b>${fmt(POTS[t.id]!=null?POTS[t.id]:t.seed)}</b></div></div>`;
+  $('payModal').hidden=false;
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest&&e.target.closest('#payView'))showPays();
+  else if(e.target===$('payModal')||(e.target.closest&&e.target.closest('#payClose')))$('payModal').hidden=true;
+});

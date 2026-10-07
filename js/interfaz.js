@@ -157,6 +157,7 @@ function buildStart(){
     <div class="row"><input type="number" id="bankIn" min="${pt.buyMin}" max="${pt.buyMax}" step="5" value="${dv}">
     <button class="btn ${S.started||SAVED?'alt':''}" id="bankGo">${S.started?'Nueva sesión':SAVED?'Nueva partida':'Continuar'}</button></div>
     <p>Para sentarte: mínimo ${fmt(pt.buyMin)} · máximo ${fmt(pt.buyMax)}</p>
+    <div class="row"><button class="btn alt" id="payView">Ver pagos y premios de ${pt.name}</button></div>
     <div id="lb" class="lbwrap">${boardHTML(S.boardTab,5,0)}</div>`;
 }
 function startGame(v){
