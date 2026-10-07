@@ -52,3 +52,42 @@ function bonusFor(h){
 }
 
 /* ---------- UI ---------- */
+
+/* Rueda de la fortuna (Las Vegas): cada blackjack natural gana un giro gratis; el premio es un múltiplo de la apuesta de esa mano.
+   Valor esperado ≈ 0.26 x apuesta por giro (≈ +1.2% por mano, con blackjacks ~4.75% de las manos). */
+const WHEEL=[0,.5,0,1,0,2,0,5,0,10,.5,25],WHEEL_W=[[0,830],[.5,100],[1,40],[2,20],[5,12],[10,5],[25,1]];
+const wheelQ=[];let wheelRot=0;
+function wheelPick(){const tot=WHEEL_W.reduce((a,w)=>a+w[1],0);let r=rand(tot);for(const [v,w] of WHEEL_W){if(r<w)return v;r-=w}return 0}
+function buildWheel(){
+  const pt=(a,r)=>[(r*Math.sin(a*Math.PI/180)).toFixed(2),(-r*Math.cos(a*Math.PI/180)).toFixed(2)];
+  const col=v=>v===0?'#1b2a24':v<1?'#5a4a1c':v<5?'#9a7b24':v<25?'#c9a43a':'#e8453c';
+  $('wSvg').innerHTML='<g id="wRot">'+WHEEL.map((v,i)=>{
+    const a0=i*30-15,a1=i*30+15,p0=pt(a0,96),p1=pt(a1,96);
+    return `<path d="M0,0 L${p0} A96,96 0 0 1 ${p1} Z" fill="${col(v)}" stroke="#0b1410" stroke-width="1.5"/>`+
+      `<text transform="rotate(${i*30}) translate(0,-68)" text-anchor="middle" dominant-baseline="middle" font-size="${v>=10?15:13}" font-weight="700" fill="${v===0?'#6d7a73':'#0b1410'}">${v===0?'—':'x'+v}</text>`;
+  }).join('')+'<circle r="10" fill="#0b1410" stroke="#d4af37" stroke-width="2"/></g>';
+}
+async function runWheel(){
+  if(S.busy||S.phase!=='done'||!wheelQ.length)return;
+  const ov=$('wheel');S.busy=true;buildWheel();ov.hidden=false;
+  const g=$('wRot'),go=$('wGo'),tx=$('wTxt');
+  while(wheelQ.length){
+    const bet=wheelQ.shift();
+    tx.textContent=`¡Blackjack! Giro gratis sobre tu apuesta de ${fmt(bet)}.`;go.textContent='Girar';go.disabled=false;
+    await new Promise(res=>{go.onclick=res});
+    go.disabled=true;
+    const v=wheelPick(),idx=WHEEL.map((x,i)=>x===v?i:-1).filter(i=>i>=0),i=idx[rand(idx.length)];
+    const target=-(i*30+(rand(21)-10)),cur=wheelRot%360;
+    wheelRot+=360*5+(((target-cur)%360)+360)%360;
+    g.style.transition='transform 4s cubic-bezier(.12,.6,.1,1)';g.style.transform=`rotate(${wheelRot}deg)`;
+    sfx('tick');const tk=setInterval(()=>sfx('tick'),260);await sleep(4100);clearInterval(tk);
+    const win=bet*v;
+    if(win>0){S.balance+=win;addLog(`Rueda de la fortuna · x${v}`,win,v>=10?'jackpot':'sidewin');tx.textContent=`¡x${v}! Ganas ${fmt(win)}`;
+      if(v>=10)celebrate('big',`Rueda de la fortuna x${v}`,win)}
+    else{S.log.unshift({text:'Rueda de la fortuna · sin premio',amt:0});tx.textContent='Esta vez no hubo premio.'}
+    S.msg=win>0?`Rueda de la fortuna: x${v} (+${fmt(win)}).`:S.msg;render();
+    go.textContent=wheelQ.length?'Siguiente giro':'Continuar';go.disabled=false;
+    await new Promise(res=>{go.onclick=res});
+  }
+  ov.hidden=true;S.busy=false;render();
+}

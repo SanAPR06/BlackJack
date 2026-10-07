@@ -2,7 +2,7 @@
    (Script clásico: comparte las variables globales con los demás archivos de js/; el orden de carga está en index.html.) */
 async function deal(){
   S.busy=true;
-  S.roundBase=S.balance+tableBet();S.bigPrize=false;S.gamble=null; // dinero antes de apostar: sirve para saber si la ronda, en total, ganó o perdió
+  S.roundBase=S.balance+tableBet();S.bigPrize=false;S.gamble=null;wheelQ.length=0; // dinero antes de apostar: sirve para saber si la ronda, en total, ganó o perdió
   S.last=S.spots.map(s=>({main:s.main,pp:s.pp,p3:s.p3}));
   S.log=[];
   chipSeen.clear();S.dec=[];S.rate=null;
@@ -104,7 +104,7 @@ function finish(){
       if(dBJ){pay=h.bet;res='Empate (BJ)'}
       else if(kA){pay=h.bet*(1+BONUS_KA);res=`K-A de picas ${BONUS_KA}:1`;addLog(`${tag} · K-A de Picas (${BONUS_KA}:1)`,h.bet*BONUS_KA,'jackpot');celebrate('big','K-A de Picas',h.bet*BONUS_KA)}
       else if(hasPrize('palo21')&&!joker&&h.cards[0].s===h.cards[1].s){pay=h.bet*(1+PALO21);res=`Blackjack de palo ${PALO21}:1`;addLog(`${tag} · Blackjack de palo (${PALO21}:1)`,h.bet*PALO21,'sidewin')}
-      else{pay=h.bet*2.5;res=joker?'Joker comodín 3:2':'Blackjack 3:2'}
+      else{pay=h.bet*2.5;res=joker?'Joker comodín 3:2':'Blackjack 3:2';if(hasPrize('rueda'))wheelQ.push(h.bet)}
     }
     else if(bon){
       // el bono se paga sobre la apuesta ORIGINAL; si doblaste, la apuesta extra se resuelve normal contra el dealer
@@ -131,6 +131,7 @@ function finish(){
   S.gamble=hasPrize('doble')&&roundNet>0.001?{amt:roundNet,n:0,card:null}:null; // Las Vegas: ofrecer doble o nada con la ganancia de la ronda
   S.msg=(dBJ?'Dealer Blackjack. ':dt>21?'Dealer se pasa ('+dt+'). ':'Dealer: '+dt+'. ')+'Resultado de la ronda: '+(roundNet>0.001?'+':roundNet<-0.001?'-':'')+fmt(Math.abs(roundNet));
   render();
+  if(wheelQ.length)setTimeout(runWheel,1100); // Las Vegas: cada blackjack natural gana un giro de la rueda
 }
 const GAMBLE_MAX=3;
 async function gamble(ch){ // doble o nada: color de la siguiente carta del zapato (50/50, sin ventaja para la casa)
